@@ -13,22 +13,12 @@ setterm -blank 0
 
 wifi-menu
 
-pacman -Sy cgpt parted wget binutils
-
-which cgpt
-which parted
-which mkfs.ext4
-which wget
-which expr
-which ping
-which bunzip2
-which chroot
-which ar
+#pacman -Sy cgpt parted wget binutils
 
 
 
 echo "Checking for net..."
-ping www.google.com -c 1 || exit 1
+#ping www.google.com -c 1 || exit 1
 
 echo "Enter device name (eg, /dev/sdb or /dev/mmcblk0)"
 echo "Note: This will destroy all data. Avoid mixing with alcohol."
@@ -68,12 +58,12 @@ dd if=/dev/mmcblk0p1 of=$kernelpart
 
 echo "Downloading Ubuntu Bionic debootstrap..."
 wget http://mirrors.kernel.org/ubuntu/pool/main/d/debootstrap/debootstrap_1.0.95_all.deb
-ar x debootstrap_1.0.67_all.deb
+ar x debootstrap_1.0.95_all.deb
 tar -xf data.tar.gz
 echo "Starting debootstrap on $rootpart..."
 mkfs.ext4 -F "$rootpart"
 mount $rootpart /mnt
-DEBOOTSTRAP_DIR=usr/share/debootstrap usr/sbin/debootstrap --no-check-gpg --components=main,non-free,contrib --arch=armhf --foreign --include=alsa-utils,acpid,xdm,x11-xserver-utils,xserver-common,xserver-xorg,xserver-xorg-core,xserver-xorg-input-all,xserver-xorg-video-fbdev,links,gpicview,pcmanfm,iceweasel,xterm,fluxbox,xdm,xinit,usbutils,kmod,libkmod2,wget,curl,wireless-tools,wpasupplicant,x11-utils,vim,pm-utils bionic /mnt
+DEBOOTSTRAP_DIR=usr/share/debootstrap usr/sbin/debootstrap --no-check-gpg --components=main,non-free,contrib,universe,multiverese --arch=armhf --foreign --include=alsa-utils,acpid,x11-xserver-utils,xserver-common,xserver-xorg,xserver-xorg-core,xserver-xorg-input-all,xserver-xorg-video-fbdev,xinit,usbutils,kmod,libkmod2,wget,curl,wireless-tools,wpasupplicant,x11-utils,vim bionic /mnt
 
 echo "Package setup in the chroot..."
 chroot /mnt /bin/sh -c "PATH=/bin:/sbin:/usr/sbin:/usr/local/sbin:$PATH /debootstrap/debootstrap --second-stage"
@@ -94,13 +84,6 @@ echo "deb http://ports.ubuntu.com/ubuntu-ports/ bionic main universe multiverse 
 
 echo "Putting a basic fstab in place..."
 echo "/dev/disk/by-partlabel/Root	/	ext4	noatime	0	0" > /mnt/etc/fstab
-
-echo "Setting up /etc/network/intrfaces.d file for mlan0..."
-echo -e "allow-hotplug mlan0
-auto mlan0
-iface mlan0 inet dhcp
-wpa-conf /etc/wpa_supplicant/wpa_supplicant.conf
-wpa-driver wext" > /mnt/etc/network/interfaces.d/mlan0
 
 echo "Putting a nice trackpad config in place..."
 echo -e 'Section "InputClass"
